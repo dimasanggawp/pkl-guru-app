@@ -12,6 +12,8 @@ import StudentList from './pages/StudentList';
 import Reviews from './pages/Reviews';
 import Alerts from './pages/Alerts';
 import MonitoringVisits from './pages/MonitoringVisits';
+import { NotificationProvider } from './contexts/NotificationContext';
+import NotificationCenter from './components/NotificationCenter';
 
 function LoginRoute() {
   const token = localStorage.getItem('token');
@@ -24,15 +26,20 @@ function LoginRoute() {
 }
 
 function Layout({ children }) {
+  const token = localStorage.getItem('token');
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <div className="flex flex-1 flex-col sm:flex-row">
-        <Sidebar />
-        <main className="flex-1">{children}</main>
+    <NotificationProvider token={token}>
+      <div className="min-h-screen flex flex-col">
+        <NotificationCenter />
+        <Header />
+        <div className="flex flex-1 flex-col sm:flex-row">
+          <Sidebar />
+          <main className="flex-1">{children}</main>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </NotificationProvider>
   );
 }
 
