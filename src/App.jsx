@@ -11,6 +11,7 @@ import Monitoring from './pages/Monitoring';
 import StudentList from './pages/StudentList';
 import Reviews from './pages/Reviews';
 import Alerts from './pages/Alerts';
+import MonitoringVisits from './pages/MonitoringVisits';
 
 function LoginRoute() {
   const token = localStorage.getItem('token');
@@ -88,6 +89,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Alerts />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/visits"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <MonitoringVisits />
                 </Layout>
               </ProtectedRoute>
             }

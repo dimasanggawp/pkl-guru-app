@@ -6,6 +6,7 @@ const links = [
   { to: '/students', label: 'Daftar Siswa' },
   { to: '/reviews', label: 'Review Jurnal' },
   { to: '/alerts', label: 'Alerts' },
+  { to: '/visits', label: 'Monitoring Visits' },
 ];
 
 function Sidebar() {
