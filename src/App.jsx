@@ -8,6 +8,7 @@ import Toast from './components/Toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Monitoring from './pages/Monitoring';
+import StudentList from './pages/StudentList';
 import Reviews from './pages/Reviews';
 import Alerts from './pages/Alerts';
 
@@ -57,6 +58,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <Monitoring />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/students"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <StudentList />
                 </Layout>
               </ProtectedRoute>
             }
