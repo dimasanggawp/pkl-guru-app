@@ -12,6 +12,7 @@ import StudentList from './pages/StudentList';
 import Reviews from './pages/Reviews';
 import Alerts from './pages/Alerts';
 import MonitoringVisits from './pages/MonitoringVisits';
+import Unauthorized from './pages/Unauthorized';
 import { NotificationProvider } from './contexts/NotificationContext';
 import NotificationCenter from './components/NotificationCenter';
 
@@ -50,10 +51,11 @@ function App() {
         <Toast />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <Dashboard />
                 </Layout>
@@ -63,7 +65,7 @@ function App() {
           <Route
             path="/monitoring"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <Monitoring />
                 </Layout>
@@ -73,7 +75,7 @@ function App() {
           <Route
             path="/students"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <StudentList />
                 </Layout>
@@ -83,7 +85,7 @@ function App() {
           <Route
             path="/reviews"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <Reviews />
                 </Layout>
@@ -93,7 +95,7 @@ function App() {
           <Route
             path="/alerts"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <Alerts />
                 </Layout>
@@ -103,7 +105,7 @@ function App() {
           <Route
             path="/visits"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="guru">
                 <Layout>
                   <MonitoringVisits />
                 </Layout>
