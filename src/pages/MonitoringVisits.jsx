@@ -5,6 +5,11 @@ import { showSuccess, showError, getErrorMessage } from '../services/toastServic
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
+const FILE_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(
+  /\/api\/?$/,
+  ''
+);
+
 function formatVisitDate(dateStr) {
   if (!dateStr) return '-';
   try {
@@ -221,7 +226,7 @@ export default function MonitoringVisits() {
                   {visit.photos.map((photo, idx) => (
                     <img
                       key={idx}
-                      src={photo}
+                      src={photo.startsWith('http') ? photo : `${FILE_BASE_URL}${photo}`}
                       alt={`Foto kunjungan ${idx + 1}`}
                       className="w-full h-24 object-cover rounded-md border border-border"
                       onError={(e) => {
