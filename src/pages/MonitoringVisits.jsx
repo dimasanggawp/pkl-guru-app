@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 import API from '../services/api';
 import { showSuccess, showError, getErrorMessage } from '../services/toastService';
 
@@ -107,37 +108,37 @@ export default function MonitoringVisits() {
     }
   };
 
-  if (loading) return <div className="p-4">Memuat data...</div>;
+  if (loading) return <p className="text-muted">Memuat data...</p>;
 
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Monitoring Visits</h1>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
-        >
+        <div>
+          <p className="kicker mb-1">Lapangan</p>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold">Monitoring Visits</h1>
+        </div>
+        <button onClick={() => setShowForm(!showForm)} className={showForm ? 'btn-secondary' : 'btn-primary'}>
           {showForm ? 'Batal' : 'Catat Kunjungan'}
         </button>
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+        <div className="mb-6 p-4 bg-warning-soft border border-border rounded-md text-sm text-warning">
           Data kunjungan belum tersedia: {error}
         </div>
       )}
 
       {showForm && (
-        <div className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">Catat Kunjungan Monitoring</h2>
+        <div className="flat-card mb-6">
+          <h2 className="text-xl font-display font-bold mb-4">Catat Kunjungan Monitoring</h2>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-700 mb-2">Pilih Siswa</label>
+              <label className="field-label">Pilih Siswa</label>
               <select
                 value={selectedStudent}
                 onChange={(e) => setSelectedStudent(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="field-input"
                 required
               >
                 <option value="">-- Pilih siswa --</option>
@@ -150,42 +151,42 @@ export default function MonitoringVisits() {
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Catatan Kunjungan</label>
+              <label className="field-label">Catatan Kunjungan</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows="4"
-                className="w-full px-4 py-2 border rounded-lg"
+                className="field-input"
                 placeholder="Catat hasil observasi selama monitoring..."
               />
             </div>
 
             <div>
-              <label className="block text-gray-700 mb-2">Lampirkan Foto</label>
+              <label className="field-label">Lampirkan Foto</label>
               <input
                 type="file"
                 multiple
                 accept="image/*"
                 onChange={handlePhotoCapture}
-                className="w-full"
+                className="field-input"
               />
               {photos.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600 mb-2">{photos.length} foto dipilih</p>
+                  <p className="text-sm text-muted mb-2">{photos.length} foto dipilih</p>
                   <div className="grid grid-cols-4 gap-2">
                     {photos.map((photo, idx) => (
                       <div key={idx} className="relative">
                         <img
                           src={URL.createObjectURL(photo)}
                           alt={`Preview ${idx}`}
-                          className="w-full h-20 object-cover rounded-lg"
+                          className="w-full h-20 object-cover rounded-md border border-border"
                         />
                         <button
                           type="button"
                           onClick={() => handleRemovePhoto(idx)}
-                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 text-xs leading-none flex items-center justify-center"
+                          className="absolute top-1 right-1 bg-danger text-white rounded-full w-5 h-5 flex items-center justify-center"
                         >
-                          ×
+                          <X size={12} />
                         </button>
                       </div>
                     ))}
@@ -194,32 +195,27 @@ export default function MonitoringVisits() {
               )}
             </div>
 
-            <button
-              onClick={handleSubmitVisit}
-              disabled={submitting}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg disabled:opacity-50"
-            >
+            <button onClick={handleSubmitVisit} disabled={submitting} className="btn-accent w-full">
               {submitting ? 'Menyimpan...' : 'Simpan Kunjungan'}
             </button>
           </div>
         </div>
       )}
 
-      {/* Visits List */}
       {visits.length > 0 ? (
         <div className="space-y-4">
           {visits.map((visit) => (
-            <div key={visit.id} className="bg-white rounded-lg shadow p-6">
+            <div key={visit.id} className="flat-card">
               <div className="flex justify-between items-start mb-3">
                 <div>
-                  <h3 className="font-bold text-lg">{visit.student_name || visit.Siswa?.nama}</h3>
-                  <p className="text-sm text-gray-600">{visit.nisn || visit.Siswa?.nisn}</p>
+                  <h3 className="font-display font-bold text-lg">{visit.student_name || visit.Siswa?.nama}</h3>
+                  <p className="text-sm text-muted">{visit.nisn || visit.Siswa?.nisn}</p>
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-muted">
                   {formatVisitDate(visit.visit_date || visit.created_at)}
                 </span>
               </div>
-              <p className="text-gray-700 mb-3">{visit.notes}</p>
+              <p className="text-ink mb-3">{visit.notes}</p>
               {Array.isArray(visit.photos) && visit.photos.length > 0 && (
                 <div className="grid grid-cols-4 gap-2">
                   {visit.photos.map((photo, idx) => (
@@ -227,7 +223,7 @@ export default function MonitoringVisits() {
                       key={idx}
                       src={photo}
                       alt={`Foto kunjungan ${idx + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
+                      className="w-full h-24 object-cover rounded-md border border-border"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
@@ -239,9 +235,7 @@ export default function MonitoringVisits() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-          Belum ada riwayat kunjungan.
-        </div>
+        <div className="flat-card text-center text-muted">Belum ada riwayat kunjungan.</div>
       )}
     </div>
   );

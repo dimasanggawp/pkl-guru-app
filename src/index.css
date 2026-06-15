@@ -2,6 +2,134 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: 245 241 232;
+  --surface: 255 255 255;
+  --surface-alt: 236 230 216;
+  --border: 222 213 195;
+  --ink: 35 32 23;
+  --muted: 138 130 112;
+
+  --primary: 47 111 78;
+  --primary-soft: 220 235 226;
+  --accent: 224 112 58;
+  --accent-soft: 251 227 212;
+
+  --success: 63 143 91;
+  --success-soft: 222 240 228;
+  --danger: 209 80 60;
+  --danger-soft: 250 226 220;
+  --warning: 199 145 31;
+  --warning-soft: 250 236 206;
+  --info: 62 124 166;
+  --info-soft: 222 235 244;
+}
+
+.dark {
+  --bg: 24 24 20;
+  --surface: 34 34 29;
+  --surface-alt: 44 44 38;
+  --border: 60 60 52;
+  --ink: 242 238 227;
+  --muted: 168 161 142;
+
+  --primary: 109 196 154;
+  --primary-soft: 33 64 53;
+  --accent: 242 147 90;
+  --accent-soft: 70 48 31;
+
+  --success: 109 196 154;
+  --success-soft: 33 64 53;
+  --danger: 230 128 116;
+  --danger-soft: 66 38 34;
+  --warning: 232 194 94;
+  --warning-soft: 64 51 24;
+  --info: 122 178 214;
+  --info-soft: 30 48 60;
+}
+
+* {
+  border-color: rgb(var(--border));
+}
+
+body {
+  @apply bg-bg text-ink font-body antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+  @apply font-display;
+}
+
+@layer components {
+  .kicker {
+    @apply text-xs font-bold uppercase tracking-[0.18em] text-muted;
+  }
+
+  .flat-card {
+    @apply bg-surface border border-border rounded-md p-6;
+  }
+
+  .flat-panel {
+    @apply bg-surface border border-border rounded-md;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 font-semibold text-white transition hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 font-semibold text-white transition hover:opacity-90 disabled:opacity-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-md border border-border bg-surface px-4 py-2 font-semibold text-ink transition hover:bg-surface-alt disabled:opacity-50;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 font-medium text-ink transition hover:bg-surface-alt;
+  }
+
+  .field-label {
+    @apply mb-1.5 block text-sm font-semibold text-ink;
+  }
+
+  .field-input {
+    @apply w-full rounded-md border border-border bg-surface px-4 py-2 text-ink placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-semibold;
+  }
+
+  .badge-success {
+    @apply badge bg-success-soft text-success;
+  }
+
+  .badge-danger {
+    @apply badge bg-danger-soft text-danger;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-soft text-warning;
+  }
+
+  .badge-info {
+    @apply badge bg-info-soft text-info;
+  }
+
+  .badge-neutral {
+    @apply badge bg-surface-alt text-muted;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-semibold text-ink/80 transition hover:bg-surface-alt;
+  }
+
+  .nav-link.active {
+    @apply bg-primary text-white hover:bg-primary;
+  }
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(400px);

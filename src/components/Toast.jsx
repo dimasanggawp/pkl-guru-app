@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
 const TOAST_STYLES = {
-  success: 'bg-green-500',
-  error: 'bg-red-500',
-  info: 'bg-blue-500',
+  success: 'bg-success',
+  error: 'bg-danger',
+  info: 'bg-info',
 };
 
 export default function Toast() {
@@ -28,7 +28,7 @@ export default function Toast() {
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`px-4 py-3 rounded-lg text-white shadow-lg ${
+          className={`px-4 py-3 rounded-md text-white ${
             TOAST_STYLES[toast.type] || TOAST_STYLES.info
           }`}
         >

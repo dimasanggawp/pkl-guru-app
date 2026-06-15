@@ -43,22 +43,23 @@ export default function StudentList() {
   const statusBadgeClass = (status) => {
     switch (status) {
       case 'hadir':
-        return 'bg-green-100 text-green-700';
+        return 'badge-success';
       case 'sakit':
-        return 'bg-yellow-100 text-yellow-700';
+        return 'badge-warning';
       case 'izin':
-        return 'bg-blue-100 text-blue-700';
+        return 'badge-info';
       default:
-        return 'bg-red-100 text-red-700';
+        return 'badge-danger';
     }
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Daftar Siswa</h1>
+    <div>
+      <p className="kicker mb-1">Data</p>
+      <h1 className="text-2xl sm:text-3xl font-display font-bold mb-6">Daftar Siswa</h1>
 
       {error && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+        <div className="mb-6 p-4 bg-warning-soft border border-border rounded-md text-sm text-warning">
           Data siswa belum tersedia: {error}
         </div>
       )}
@@ -70,12 +71,12 @@ export default function StudentList() {
           placeholder="Cari nama atau NISN..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-4 py-2 border rounded-lg"
+          className="field-input flex-1"
         />
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border rounded-lg"
+          className="field-input sm:w-48"
         >
           <option value="all">Semua Status</option>
           <option value="hadir">Hadir</option>
@@ -87,43 +88,39 @@ export default function StudentList() {
 
       {/* Student Table */}
       {loading ? (
-        <div>Memuat data siswa...</div>
+        <p className="text-muted">Memuat data siswa...</p>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="flat-panel overflow-x-auto">
           <table className="w-full min-w-full">
-            <thead className="bg-gray-100 border-b">
+            <thead className="bg-surface-alt border-b border-border">
               <tr>
-                <th className="px-6 py-3 text-left">NISN</th>
-                <th className="px-6 py-3 text-left">Nama</th>
-                <th className="px-6 py-3 text-left">Tempat PKL</th>
-                <th className="px-6 py-3 text-left">Status Hari Ini</th>
-                <th className="px-6 py-3 text-left">Aksi</th>
+                <th className="px-6 py-3 text-left font-display">NISN</th>
+                <th className="px-6 py-3 text-left font-display">Nama</th>
+                <th className="px-6 py-3 text-left font-display">Tempat PKL</th>
+                <th className="px-6 py-3 text-left font-display">Status Hari Ini</th>
+                <th className="px-6 py-3 text-left font-display">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {filteredStudents.length > 0 ? (
                 filteredStudents.map((student) => (
-                  <tr key={student.id} className="border-b hover:bg-gray-50">
+                  <tr key={student.id} className="border-b border-border hover:bg-surface-alt">
                     <td className="px-6 py-3">{student.nisn}</td>
                     <td className="px-6 py-3">{student.name}</td>
                     <td className="px-6 py-3">{student.company}</td>
                     <td className="px-6 py-3">
-                      <span
-                        className={`px-3 py-1 rounded text-sm ${statusBadgeClass(
-                          student.todayStatus
-                        )}`}
-                      >
+                      <span className={statusBadgeClass(student.todayStatus)}>
                         {student.todayStatus || 'belum presensi'}
                       </span>
                     </td>
                     <td className="px-6 py-3">
-                      <button className="text-blue-600 hover:underline">Lihat</button>
+                      <button className="text-primary font-semibold hover:underline">Lihat</button>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-4 text-center text-muted">
                     Tidak ada siswa ditemukan.
                   </td>
                 </tr>

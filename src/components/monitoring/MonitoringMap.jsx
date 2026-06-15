@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Circle, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import API from '../../services/api';
 import { showError, getErrorMessage } from '../../services/toastService';
 import 'leaflet/dist/leaflet.css';
@@ -56,27 +57,27 @@ export default function MonitoringMap() {
     [students, selectedZone]
   );
 
-  if (loading) return <div className="p-4">Memuat peta monitoring...</div>;
+  if (loading) return <p className="text-muted">Memuat peta monitoring...</p>;
 
   const mapCenter =
     zones.length > 0 ? [zones[0].latitude, zones[0].longitude] : DEFAULT_CENTER;
 
   return (
-    <div className="flex flex-col sm:flex-row h-[calc(100vh-8rem)]">
+    <div className="flex flex-col sm:flex-row h-[calc(100vh-12rem)] gap-4">
       {/* Sidebar - Zone List */}
-      <div className="w-full sm:w-64 bg-white shadow-lg overflow-y-auto">
+      <div className="w-full sm:w-72 flat-panel overflow-y-auto">
         {error && (
-          <div className="m-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+          <div className="m-4 p-3 bg-warning-soft border border-border rounded-md text-xs text-warning">
             Data monitoring belum tersedia: {error}
           </div>
         )}
 
         <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Zona</h2>
+          <h2 className="font-display font-bold text-lg mb-3">Zona</h2>
           <button
             onClick={() => setSelectedZone(null)}
-            className={`w-full text-left p-3 rounded mb-2 ${
-              selectedZone === null ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
+            className={`w-full text-left p-3 rounded-md mb-2 transition ${
+              selectedZone === null ? 'bg-primary text-white' : 'bg-surface-alt text-ink hover:bg-border'
             }`}
           >
             Semua Zona ({students.length})
@@ -85,47 +86,48 @@ export default function MonitoringMap() {
             <button
               key={zone.id}
               onClick={() => setSelectedZone(zone.id)}
-              className={`w-full text-left p-3 rounded mb-2 ${
-                selectedZone === zone.id ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
+              className={`w-full text-left p-3 rounded-md mb-2 transition ${
+                selectedZone === zone.id ? 'bg-primary text-white' : 'bg-surface-alt text-ink hover:bg-border'
               }`}
             >
               <div className="font-semibold">{zone.name}</div>
-              <div className="text-sm">
+              <div className="text-sm opacity-80">
                 {students.filter((s) => s.zoneId === zone.id).length} siswa
               </div>
             </button>
           ))}
-          {zones.length === 0 && <p className="text-sm text-gray-500">Belum ada data zona.</p>}
+          {zones.length === 0 && <p className="text-sm text-muted">Belum ada data zona.</p>}
         </div>
 
         {/* Student List */}
-        <div className="p-4 border-t">
-          <h3 className="font-bold mb-3">Siswa</h3>
+        <div className="p-4 border-t border-border">
+          <h3 className="font-display font-bold mb-3">Siswa</h3>
           <div className="space-y-2">
             {filteredStudents.map((student) => (
-              <div key={student.id} className="p-2 bg-gray-50 rounded text-sm">
+              <div key={student.id} className="p-3 bg-surface-alt rounded-md text-sm">
                 <div className="font-semibold">{student.name}</div>
                 <div
-                  className={`text-xs ${
-                    student.inGeofence ? 'text-green-600' : 'text-red-600'
+                  className={`flex items-center gap-1 text-xs mt-1 ${
+                    student.inGeofence ? 'text-success' : 'text-danger'
                   }`}
                 >
-                  {student.inGeofence ? '✅ Dalam Zona' : '⚠️ Luar Zona'}
+                  {student.inGeofence ? <CheckCircle2 size={14} /> : <AlertTriangle size={14} />}
+                  {student.inGeofence ? 'Dalam Zona' : 'Luar Zona'}
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-muted">
                   {Number(student.distance || 0).toFixed(0)}m
                 </div>
               </div>
             ))}
             {filteredStudents.length === 0 && (
-              <p className="text-sm text-gray-500">Belum ada data siswa.</p>
+              <p className="text-sm text-muted">Belum ada data siswa.</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Map */}
-      <div className="flex-1">
+      <div className="flex-1 flat-panel overflow-hidden">
         <MapContainer center={mapCenter} zoom={14} scrollWheelZoom={true} className="h-full w-full">
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -138,9 +140,9 @@ export default function MonitoringMap() {
               key={zone.id}
               center={[zone.latitude, zone.longitude]}
               radius={zone.radius || GEOFENCE_RADIUS}
-              color="green"
-              fillColor="lightgreen"
-              fillOpacity={0.2}
+              color="#3F8F5B"
+              fillColor="#3F8F5B"
+              fillOpacity={0.15}
               eventHandlers={{ click: () => setSelectedZone(zone.id) }}
             >
               <Popup>
@@ -164,7 +166,7 @@ export default function MonitoringMap() {
                   <br />
                   Zona: {student.zoneName || 'Unknown'}
                   <br />
-                  Status: {student.inGeofence ? '✅ Dalam Zona' : '⚠️ Luar Zona'}
+                  Status: {student.inGeofence ? 'Dalam Zona' : 'Luar Zona'}
                   <br />
                   Jarak: {Number(student.distance || 0).toFixed(2)}m
                 </div>

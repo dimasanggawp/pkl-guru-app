@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { AlertTriangle, CheckCircle2, ClipboardList, Bell } from 'lucide-react';
 import API from '../services/api';
 import { showError, getErrorMessage } from '../services/toastService';
 
@@ -17,16 +18,16 @@ function formatAlertDate(dateStr) {
   }
 }
 
-function getAlertIcon(type) {
+function AlertIcon({ type }) {
   switch (type) {
     case 'geofence_exit':
-      return '⚠️';
+      return <AlertTriangle size={22} className="text-warning" />;
     case 'geofence_entry':
-      return '✅';
+      return <CheckCircle2 size={22} className="text-success" />;
     case 'journal_pending':
-      return '📋';
+      return <ClipboardList size={22} className="text-info" />;
     default:
-      return '🔔';
+      return <Bell size={22} className="text-primary" />;
   }
 }
 
@@ -69,86 +70,74 @@ export default function Alerts() {
 
   const unreadCount = useMemo(() => alerts.filter((a) => !a.read).length, [alerts]);
 
+  const filters = [
+    { key: 'all', label: 'Semua' },
+    { key: 'unread', label: 'Belum Dibaca' },
+    { key: 'geofence', label: 'Geofence' },
+  ];
+
   return (
-    <div className="p-6">
+    <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Alerts Center</h1>
+        <div>
+          <p className="kicker mb-1">Notifikasi</p>
+          <h1 className="text-2xl sm:text-3xl font-display font-bold">Alerts Center</h1>
+        </div>
         {unreadCount > 0 && (
-          <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm">
-            {unreadCount} belum dibaca
-          </span>
+          <span className="badge-danger">{unreadCount} belum dibaca</span>
         )}
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+        <div className="mb-6 p-4 bg-warning-soft border border-border rounded-md text-sm text-warning">
           Data alert belum tersedia: {error}
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'all' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'
-          }`}
-        >
-          Semua
-        </button>
-        <button
-          onClick={() => setFilter('unread')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'unread' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'
-          }`}
-        >
-          Belum Dibaca
-        </button>
-        <button
-          onClick={() => setFilter('geofence')}
-          className={`px-4 py-2 rounded-lg transition ${
-            filter === 'geofence' ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border'
-          }`}
-        >
-          Geofence
-        </button>
+      <div className="flex gap-3 mb-6">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={filter === f.key ? 'btn-primary' : 'btn-secondary'}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
       {/* Alerts List */}
       {loading ? (
-        <div>Memuat alerts...</div>
+        <p className="text-muted">Memuat alerts...</p>
       ) : alerts.length > 0 ? (
         <div className="space-y-3">
           {alerts.map((alert) => (
             <div
               key={alert.id}
-              className={`p-4 rounded-lg border-l-4 cursor-pointer transition ${
-                alert.read
-                  ? 'bg-gray-50 border-l-gray-300'
-                  : 'bg-blue-50 border-l-blue-500 hover:shadow-md'
+              className={`flat-card cursor-pointer transition border-l-4 ${
+                alert.read ? 'border-l-border' : 'border-l-primary hover:bg-surface-alt'
               }`}
               onClick={() => !alert.read && handleMarkAsRead(alert.id)}
             >
               <div className="flex justify-between items-start">
                 <div className="flex gap-3 flex-1">
-                  <span className="text-2xl">{getAlertIcon(alert.type)}</span>
+                  <AlertIcon type={alert.type} />
                   <div>
-                    <p className="font-bold">{alert.title || 'Geofencing Alert'}</p>
-                    <p className="text-gray-600">{alert.message}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="font-semibold">{alert.title || 'Geofencing Alert'}</p>
+                    <p className="text-ink">{alert.message}</p>
+                    <p className="text-xs text-muted mt-1">
                       {formatAlertDate(alert.createdAt || alert.tanggal)}
                     </p>
                   </div>
                 </div>
-                {!alert.read && <span className="w-3 h-3 bg-blue-500 rounded-full mt-1.5"></span>}
+                {!alert.read && <span className="w-2.5 h-2.5 bg-primary rounded-full mt-1.5"></span>}
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
-          Tidak ada alert.
-        </div>
+        <div className="flat-card text-center text-muted">Tidak ada alert.</div>
       )}
     </div>
   );

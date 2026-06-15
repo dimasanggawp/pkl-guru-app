@@ -12,8 +12,10 @@ import {
   Legend,
   ArcElement,
 } from 'chart.js';
+import { Users, CheckCircle2, BookCheck, Clock } from 'lucide-react';
 import API from '../services/api';
 import { showError, getErrorMessage } from '../services/toastService';
+import { useChartColors } from '../hooks/useChartColors';
 
 ChartJS.register(
   CategoryScale,
@@ -31,6 +33,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const colors = useChartColors();
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -60,13 +63,12 @@ export default function Dashboard() {
             Number(stats?.izinCount) || 0,
             Number(stats?.alphaCount) || 0,
           ],
-          backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
-          borderColor: ['#059669', '#D97706', '#1D4ED8', '#DC2626'],
-          borderWidth: 2,
+          backgroundColor: [colors.success, colors.warning, colors.info, colors.danger],
+          borderWidth: 0,
         },
       ],
     }),
-    [stats]
+    [stats, colors]
   );
 
   const weeklyActivityData = useMemo(
@@ -76,87 +78,83 @@ export default function Dashboard() {
         {
           label: 'Hadir',
           data: stats?.weeklyPresence || [0, 0, 0, 0, 0, 0, 0],
-          borderColor: '#10B981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4,
+          borderColor: colors.success,
+          backgroundColor: colors.success,
+          tension: 0.3,
         },
         {
           label: 'Tanpa Keterangan',
           data: stats?.weeklyAlpha || [0, 0, 0, 0, 0, 0, 0],
-          borderColor: '#EF4444',
-          backgroundColor: 'rgba(239, 68, 68, 0.1)',
-          tension: 0.4,
+          borderColor: colors.danger,
+          backgroundColor: colors.danger,
+          tension: 0.3,
         },
       ],
     }),
-    [stats]
+    [stats, colors]
   );
 
-  if (loading) return <div className="p-6">Memuat dashboard...</div>;
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { color: colors.text } },
+    },
+  };
+
+  if (loading) return <p className="text-muted">Memuat dashboard...</p>;
+
+  const statCards = [
+    { label: 'Total Siswa', value: stats?.totalStudents || 0, icon: Users, accent: 'text-primary' },
+    { label: 'Hadir Hari Ini', value: stats?.hadirToday || 0, icon: CheckCircle2, accent: 'text-success' },
+    { label: 'Jurnal Ditinjau', value: stats?.journalReviewedCount || 0, icon: BookCheck, accent: 'text-info' },
+    { label: 'Menunggu Review', value: stats?.pendingReviewCount || 0, icon: Clock, accent: 'text-warning' },
+  ];
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6">Dashboard Monitoring</h1>
+    <div>
+      <p className="kicker mb-1">Ringkasan</p>
+      <h1 className="text-2xl sm:text-3xl font-display font-bold mb-6">Dashboard Monitoring</h1>
 
       {error && (
-        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+        <div className="mb-6 p-4 bg-warning-soft border border-border rounded-md text-sm text-warning">
           Data dashboard belum tersedia: {error}
         </div>
       )}
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Total Siswa</h3>
-          <p className="text-2xl font-bold mt-2">{stats?.totalStudents || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Hadir Hari Ini</h3>
-          <p className="text-2xl font-bold mt-2 text-green-600">{stats?.hadirToday || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Jurnal Ditinjau</h3>
-          <p className="text-2xl font-bold mt-2">{stats?.journalReviewedCount || 0}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-gray-500 text-sm">Menunggu Review</h3>
-          <p className="text-2xl font-bold mt-2 text-yellow-600">
-            {stats?.pendingReviewCount || 0}
-          </p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {statCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <div key={card.label} className="flat-card">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="kicker">{card.label}</h3>
+                <Icon size={20} className={card.accent} />
+              </div>
+              <p className="text-3xl font-display font-bold">{card.value}</p>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-4">Ringkasan Kehadiran</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="flat-card">
+          <h2 className="text-lg font-display font-bold mb-4">Ringkasan Kehadiran</h2>
           <div className="h-64">
-            <Pie
-              data={presenceChartData}
-              options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'bottom' },
-                },
-              }}
-            />
+            <Pie data={presenceChartData} options={chartOptions} />
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-4">Aktivitas Mingguan</h2>
+        <div className="flat-card">
+          <h2 className="text-lg font-display font-bold mb-4">Aktivitas Mingguan</h2>
           <div className="h-64">
             <Line
               data={weeklyActivityData}
               options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'bottom' },
-                },
+                ...chartOptions,
                 scales: {
-                  y: { beginAtZero: true },
+                  y: { beginAtZero: true, ticks: { color: colors.text }, grid: { color: colors.grid } },
+                  x: { ticks: { color: colors.text }, grid: { color: colors.grid } },
                 },
               }}
             />

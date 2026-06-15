@@ -30,12 +30,12 @@ function Layout({ children }) {
 
   return (
     <NotificationProvider token={token}>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-bg text-ink">
         <NotificationCenter />
         <Header />
         <div className="flex flex-1 flex-col sm:flex-row">
           <Sidebar />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
         <Footer />
       </div>

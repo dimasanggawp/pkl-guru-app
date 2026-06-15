@@ -74,7 +74,7 @@ export default function JournalReview() {
     }
   };
 
-  if (loading) return <div className="p-4">Memuat jurnal...</div>;
+  if (loading) return <p className="text-muted">Memuat jurnal...</p>;
 
   const images = selectedJournal?.images || (selectedJournal?.foto_path ? [selectedJournal.foto_path] : []);
 
@@ -82,37 +82,37 @@ export default function JournalReview() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Journal List */}
       <div className="lg:col-span-1">
-        <h2 className="text-xl font-bold mb-4">Menunggu Review ({journals.length})</h2>
+        <h2 className="font-display font-bold text-lg mb-4">Menunggu Review ({journals.length})</h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+          <div className="mb-4 p-3 bg-warning-soft border border-border rounded-md text-xs text-warning">
             Data jurnal belum tersedia: {error}
           </div>
         )}
 
-        <div className="space-y-2 bg-white rounded-lg shadow">
+        <div className="flat-panel divide-y divide-border">
           {journals.length > 0 ? (
             journals.map((journal) => (
               <button
                 key={journal.id}
                 onClick={() => setSelectedJournal(journal)}
-                className={`w-full text-left p-4 border-b hover:bg-blue-50 transition ${
-                  selectedJournal?.id === journal.id ? 'bg-blue-100' : ''
+                className={`w-full text-left p-4 hover:bg-surface-alt transition ${
+                  selectedJournal?.id === journal.id ? 'bg-primary-soft' : ''
                 }`}
               >
-                <p className="font-bold">
+                <p className="font-semibold">
                   {journal.title || journal.deskripsi?.slice(0, 50) || 'Tanpa judul'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted">
                   {journal.siswa_name || journal.Siswa?.nama || 'Tidak diketahui'}
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   {formatDate(journal.createdAt || journal.tanggal)}
                 </p>
               </button>
             ))
           ) : (
-            <div className="p-4 text-sm text-gray-500">Tidak ada jurnal yang menunggu review.</div>
+            <div className="p-4 text-sm text-muted">Tidak ada jurnal yang menunggu review.</div>
           )}
         </div>
       </div>
@@ -120,17 +120,17 @@ export default function JournalReview() {
       {/* Review Panel */}
       <div className="lg:col-span-2">
         {selectedJournal ? (
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-bold mb-4">
+          <div className="flat-card">
+            <h2 className="text-xl font-display font-bold mb-4">
               {selectedJournal.title || selectedJournal.deskripsi?.slice(0, 50) || 'Tanpa judul'}
             </h2>
 
             {/* Journal Content */}
-            <div className="mb-6 pb-6 border-b">
-              <p className="text-sm text-gray-600 mb-2">
+            <div className="mb-6 pb-6 border-b border-border">
+              <p className="text-sm text-muted mb-2">
                 Oleh: {selectedJournal.siswa_name || selectedJournal.Siswa?.nama || 'Tidak diketahui'}
               </p>
-              <p className="text-gray-800">
+              <p className="text-ink">
                 {selectedJournal.content || selectedJournal.deskripsi}
               </p>
 
@@ -142,7 +142,7 @@ export default function JournalReview() {
                       key={idx}
                       src={img.startsWith('http') ? img : `${FILE_BASE_URL}${img}`}
                       alt={`Jurnal ${idx + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
+                      className="w-full h-24 object-cover rounded-md border border-border"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
@@ -155,11 +155,11 @@ export default function JournalReview() {
             {/* Review Form */}
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-700 mb-2">Status</label>
+                <label className="field-label">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="field-input"
                 >
                   <option value="">Pilih Aksi</option>
                   <option value="approved">Setujui</option>
@@ -169,12 +169,12 @@ export default function JournalReview() {
               </div>
 
               <div>
-                <label className="block text-gray-700 mb-2">Feedback</label>
+                <label className="field-label">Feedback</label>
                 <textarea
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
                   rows="4"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="field-input"
                   placeholder="Tulis catatan untuk siswa..."
                 />
               </div>
@@ -182,14 +182,14 @@ export default function JournalReview() {
               <button
                 onClick={handleSubmitReview}
                 disabled={submitting || !status || !feedback}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition disabled:opacity-50"
+                className="btn-primary w-full"
               >
                 {submitting ? 'Mengirim...' : 'Kirim Review'}
               </button>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+          <div className="flat-card text-center text-muted">
             Pilih jurnal untuk direview
           </div>
         )}

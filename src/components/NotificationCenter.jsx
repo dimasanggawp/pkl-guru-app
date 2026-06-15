@@ -9,14 +9,14 @@ export default function NotificationCenter() {
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`p-4 rounded-lg shadow-lg text-white animate-slide-in ${
+          className={`p-4 rounded-md text-white animate-slide-in ${
             notification.type === 'alert'
-              ? 'bg-red-500'
+              ? 'bg-danger'
               : notification.type === 'success'
-              ? 'bg-green-500'
+              ? 'bg-success'
               : notification.type === 'warning'
-              ? 'bg-yellow-500'
-              : 'bg-blue-500'
+              ? 'bg-warning'
+              : 'bg-info'
           }`}
         >
           <div className="flex justify-between items-start">
