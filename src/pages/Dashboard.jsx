@@ -29,10 +29,15 @@ ChartJS.register(
   ArcElement
 );
 
+function formatTanggal(value) {
+  return new Date(value).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [tahunAjaran, setTahunAjaran] = useState(null);
   const colors = useChartColors();
 
   useEffect(() => {
@@ -49,7 +54,17 @@ export default function Dashboard() {
       }
     };
 
+    const fetchTahunAjaran = async () => {
+      try {
+        const response = await API.get('/tahun-ajaran/active');
+        setTahunAjaran(response.data?.data || response.data);
+      } catch {
+        setTahunAjaran(null);
+      }
+    };
+
     fetchDashboardData();
+    fetchTahunAjaran();
   }, []);
 
   const presenceChartData = useMemo(
@@ -114,7 +129,14 @@ export default function Dashboard() {
   return (
     <div>
       <p className="kicker mb-1">Ringkasan</p>
-      <h1 className="text-2xl sm:text-3xl font-display font-bold mb-6">Dashboard Monitoring</h1>
+      <h1 className="text-2xl sm:text-3xl font-display font-bold mb-2">Dashboard Monitoring</h1>
+
+      {tahunAjaran && (
+        <p className="mb-6 text-sm text-muted">
+          Tahun Pelajaran {tahunAjaran.nama} • Periode PKL: {formatTanggal(tahunAjaran.tanggal_mulai_pkl)} -{' '}
+          {formatTanggal(tahunAjaran.tanggal_selesai_pkl)}
+        </p>
+      )}
 
       {error && (
         <div className="mb-6 p-4 bg-warning-soft border border-border rounded-md text-sm text-warning">
