@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/common/Header';
 import Sidebar from './components/common/Sidebar';
@@ -6,15 +7,24 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import Toast from './components/Toast';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Monitoring from './pages/Monitoring';
-import StudentList from './pages/StudentList';
-import Reviews from './pages/Reviews';
-import Alerts from './pages/Alerts';
-import MonitoringVisits from './pages/MonitoringVisits';
-import Unauthorized from './pages/Unauthorized';
 import { NotificationProvider } from './contexts/NotificationContext';
 import NotificationCenter from './components/NotificationCenter';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Monitoring = lazy(() => import('./pages/Monitoring'));
+const StudentList = lazy(() => import('./pages/StudentList'));
+const Reviews = lazy(() => import('./pages/Reviews'));
+const Alerts = lazy(() => import('./pages/Alerts'));
+const MonitoringVisits = lazy(() => import('./pages/MonitoringVisits'));
+const Unauthorized = lazy(() => import('./pages/Unauthorized'));
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center p-12 text-muted text-sm">
+      Memuat halaman...
+    </div>
+  );
+}
 
 function LoginRoute() {
   const token = localStorage.getItem('token');
@@ -36,7 +46,9 @@ function Layout({ children }) {
         <Header />
         <div className="flex flex-1 flex-col sm:flex-row">
           <Sidebar />
-          <main className="flex-1 p-4 sm:p-6">{children}</main>
+          <main className="flex-1 p-4 sm:p-6">
+            <Suspense fallback={<PageLoader />}>{children}</Suspense>
+          </main>
         </div>
         <Footer />
       </div>
@@ -51,7 +63,14 @@ function App() {
         <Toast />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route
+            path="/unauthorized"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <Unauthorized />
+              </Suspense>
+            }
+          />
           <Route
             path="/"
             element={
