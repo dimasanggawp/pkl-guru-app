@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 export function useAuth() {
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
-  const token = localStorage.getItem('token');
+  const user = JSON.parse(localStorage.getItem('guru_user') || 'null');
+  const token = localStorage.getItem('guru_token');
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    localStorage.removeItem('guru_token');
+    localStorage.removeItem('guru_user');
     navigate('/login');
   };
 

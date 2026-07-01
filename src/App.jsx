@@ -27,7 +27,7 @@ function PageLoader() {
 }
 
 function LoginRoute() {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('guru_token');
 
   if (token) {
     return <Navigate to="/" replace />;
@@ -37,7 +37,7 @@ function LoginRoute() {
 }
 
 function Layout({ children }) {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('guru_token');
 
   return (
     <NotificationProvider token={token}>
@@ -59,7 +59,7 @@ function Layout({ children }) {
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Toast />
         <Routes>
           <Route path="/login" element={<LoginRoute />} />
