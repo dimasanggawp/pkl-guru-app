@@ -13,6 +13,7 @@ import NotificationCenter from './components/NotificationCenter';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Monitoring = lazy(() => import('./pages/Monitoring'));
 const StudentList = lazy(() => import('./pages/StudentList'));
+const PresensiHarian = lazy(() => import('./pages/PresensiHarian'));
 const Reviews = lazy(() => import('./pages/Reviews'));
 const Alerts = lazy(() => import('./pages/Alerts'));
 const MonitoringVisits = lazy(() => import('./pages/MonitoringVisits'));
@@ -97,6 +98,16 @@ function App() {
               <ProtectedRoute role="guru">
                 <Layout>
                   <StudentList />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/presensi-harian"
+            element={
+              <ProtectedRoute role="guru">
+                <Layout>
+                  <PresensiHarian />
                 </Layout>
               </ProtectedRoute>
             }

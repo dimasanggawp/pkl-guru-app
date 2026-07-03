@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, MapPin, Users, BookCheck, Bell, ClipboardList } from 'lucide-react';
+import { LayoutGrid, MapPin, Users, BookCheck, Bell, ClipboardList, CalendarCheck } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Dashboard', icon: LayoutGrid, end: true },
   { to: '/monitoring', label: 'Monitoring', icon: MapPin },
   { to: '/students', label: 'Daftar Siswa', icon: Users },
+  { to: '/presensi-harian', label: 'Presensi Harian', icon: CalendarCheck },
   { to: '/reviews', label: 'Review Jurnal', icon: BookCheck },
   { to: '/alerts', label: 'Alerts', icon: Bell },
   { to: '/visits', label: 'Monitoring Visits', icon: ClipboardList },
