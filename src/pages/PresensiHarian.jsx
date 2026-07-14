@@ -105,6 +105,11 @@ function todayISODate() {
   return new Date().toISOString().split('T')[0];
 }
 
+function formatJamUpload(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function PresensiHarian() {
   const [tanggal, setTanggal] = useState(todayISODate());
   const [search, setSearch] = useState('');
@@ -279,7 +284,7 @@ export default function PresensiHarian() {
                 <th className="px-6 py-3 text-left font-display">Kelas</th>
                 <th className="px-6 py-3 text-left font-display">Status</th>
                 <th className="px-6 py-3 text-left font-display">Jam Masuk</th>
-                <th className="px-6 py-3 text-left font-display">Jam Keluar</th>
+                <th className="px-6 py-3 text-left font-display">Jam Upload Jurnal</th>
                 <th className="px-6 py-3 text-left font-display">Lokasi Presensi</th>
                 <th className="px-6 py-3 text-left font-display">Jarak ke Tempat PKL</th>
               </tr>
@@ -303,7 +308,7 @@ export default function PresensiHarian() {
                         <span className={statusBadgeClass(s.status)}>{s.status || 'belum presensi'}</span>
                       </td>
                       <td className="px-6 py-3">{s.jam_masuk || '-'}</td>
-                      <td className="px-6 py-3">{s.jam_keluar || '-'}</td>
+                      <td className="px-6 py-3">{formatJamUpload(s.jam_upload_jurnal)}</td>
                       <td className="px-6 py-3">
                         {s.lat_masuk != null && s.lon_masuk != null ? (
                           <a
