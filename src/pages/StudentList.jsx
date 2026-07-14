@@ -12,10 +12,21 @@ export default function StudentList() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await API.get('/guru/siswa', {
-          params: { search, status: statusFilter },
-        });
-        setStudents(response.data?.data || response.data || []);
+        const today = new Date().toISOString().split('T')[0];
+        const [siswaRes, presensiRes] = await Promise.all([
+          API.get('/guru/siswa'),
+          API.get('/guru/presensi', { params: { tanggal: today } }),
+        ]);
+        const siswaList = siswaRes.data?.data || [];
+        const presensiBySiswaId = new Map(
+          (presensiRes.data?.data?.siswa || []).map((p) => [p.siswa_id, p.status])
+        );
+        setStudents(
+          siswaList.map((s) => ({
+            ...s,
+            todayStatus: presensiBySiswaId.get(s.id) || null,
+          }))
+        );
         setError(null);
       } catch (err) {
         const msg = getErrorMessage(err);
@@ -28,16 +39,20 @@ export default function StudentList() {
     };
 
     fetchStudents();
-  }, [search, statusFilter]);
+  }, []);
 
   const filteredStudents = useMemo(
     () =>
-      students.filter(
-        (student) =>
-          (student.name || '').toLowerCase().includes(search.toLowerCase()) ||
-          (student.nisn || '').includes(search)
-      ),
-    [students, search]
+      students.filter((student) => {
+        const matchesSearch =
+          (student.nama || '').toLowerCase().includes(search.toLowerCase()) ||
+          (student.nisn || '').includes(search);
+        const matchesStatus =
+          statusFilter === 'all' ||
+          (statusFilter === 'belum' ? !student.todayStatus : student.todayStatus === statusFilter);
+        return matchesSearch && matchesStatus;
+      }),
+    [students, search, statusFilter]
   );
 
   const statusBadgeClass = (status) => {
@@ -83,6 +98,7 @@ export default function StudentList() {
           <option value="sakit">Sakit</option>
           <option value="izin">Izin</option>
           <option value="alpha">Alpha</option>
+          <option value="belum">Belum Presensi</option>
         </select>
       </div>
 
@@ -98,7 +114,6 @@ export default function StudentList() {
                 <th className="px-6 py-3 text-left font-display">Nama</th>
                 <th className="px-6 py-3 text-left font-display">Tempat PKL</th>
                 <th className="px-6 py-3 text-left font-display">Status Hari Ini</th>
-                <th className="px-6 py-3 text-left font-display">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -106,21 +121,18 @@ export default function StudentList() {
                 filteredStudents.map((student) => (
                   <tr key={student.id} className="border-b border-border hover:bg-surface-alt">
                     <td className="px-6 py-3">{student.nisn}</td>
-                    <td className="px-6 py-3">{student.name}</td>
-                    <td className="px-6 py-3">{student.company}</td>
+                    <td className="px-6 py-3">{student.nama}</td>
+                    <td className="px-6 py-3">{student.tempatPkl?.nama || '-'}</td>
                     <td className="px-6 py-3">
                       <span className={statusBadgeClass(student.todayStatus)}>
                         {student.todayStatus || 'belum presensi'}
                       </span>
                     </td>
-                    <td className="px-6 py-3">
-                      <button className="text-primary font-semibold hover:underline">Lihat</button>
-                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center text-muted">
+                  <td colSpan="4" className="px-6 py-4 text-center text-muted">
                     Tidak ada siswa ditemukan.
                   </td>
                 </tr>
