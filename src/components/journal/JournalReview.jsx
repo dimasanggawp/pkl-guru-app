@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { X, ZoomIn } from 'lucide-react';
 import API from '../../services/api';
 import { showSuccess, showError, getErrorMessage } from '../../services/toastService';
 
@@ -60,8 +61,20 @@ export default function JournalReview() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState(null);
 
   const [refreshKey, setRefreshKey] = useState(0);
+
+  const closeLightbox = useCallback(() => setLightboxSrc(null), []);
+
+  useEffect(() => {
+    if (!lightboxSrc) return undefined;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeLightbox();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxSrc, closeLightbox]);
 
   useEffect(() => {
     const fetchJournals = async () => {
@@ -262,17 +275,32 @@ export default function JournalReview() {
 
                 {images.length > 0 && (
                   <div className="mt-4 grid grid-cols-3 gap-2">
-                    {images.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={img.startsWith('http') ? img : `${FILE_BASE_URL}${img}`}
-                        alt={`Jurnal ${idx + 1}`}
-                        className="w-full h-24 object-cover rounded-md border border-border"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ))}
+                    {images.map((img, idx) => {
+                      const fullSrc = img.startsWith('http') ? img : `${FILE_BASE_URL}${img}`;
+                      return (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setLightboxSrc(fullSrc)}
+                          className="group relative w-full h-24 rounded-md border border-border overflow-hidden"
+                        >
+                          <img
+                            src={fullSrc}
+                            alt={`Dokumentasi jurnal ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                          <span className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors">
+                            <ZoomIn
+                              size={20}
+                              className="text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            />
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -345,6 +373,31 @@ export default function JournalReview() {
           )}
         </div>
       </div>
+
+      {lightboxSrc && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Foto dokumentasi jurnal"
+          onClick={closeLightbox}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8"
+        >
+          <button
+            type="button"
+            onClick={closeLightbox}
+            aria-label="Tutup"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 h-10 w-10 flex items-center justify-center rounded-md bg-surface text-ink hover:bg-surface-alt transition"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={lightboxSrc}
+            alt="Dokumentasi jurnal ukuran penuh"
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-full max-w-full rounded-md object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }
