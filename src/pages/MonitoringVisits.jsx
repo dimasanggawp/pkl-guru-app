@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import API from '../services/api';
 import { showSuccess, showError, getErrorMessage } from '../services/toastService';
+import { compressImage } from '../utils/imageCompression';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -35,6 +36,7 @@ export default function MonitoringVisits() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [compressing, setCompressing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -62,19 +64,29 @@ export default function MonitoringVisits() {
     fetchData();
   }, [refreshKey]);
 
-  const handlePhotoCapture = (e) => {
+  const handlePhotoCapture = async (e) => {
     const files = Array.from(e.target.files);
-    const validFiles = [];
+    e.target.value = '';
 
-    files.forEach((file) => {
+    const validFiles = files.filter((file) => {
       if (file.size > MAX_FILE_SIZE) {
         showError(`File ${file.name} terlalu besar (maks 5MB)`);
-        return;
+        return false;
       }
-      validFiles.push(file);
+      return true;
     });
 
-    setPhotos((prev) => [...prev, ...validFiles]);
+    if (validFiles.length === 0) return;
+
+    setCompressing(true);
+    try {
+      const compressed = await Promise.all(
+        validFiles.map((file) => compressImage(file).catch(() => file))
+      );
+      setPhotos((prev) => [...prev, ...compressed]);
+    } finally {
+      setCompressing(false);
+    }
   };
 
   const handleRemovePhoto = (idx) => {
@@ -173,8 +185,10 @@ export default function MonitoringVisits() {
                 multiple
                 accept="image/*"
                 onChange={handlePhotoCapture}
+                disabled={compressing}
                 className="field-input"
               />
+              {compressing && <p className="text-sm text-muted mt-2">Mengompres foto...</p>}
               {photos.length > 0 && (
                 <div className="mt-2">
                   <p className="text-sm text-muted mb-2">{photos.length} foto dipilih</p>
@@ -200,7 +214,11 @@ export default function MonitoringVisits() {
               )}
             </div>
 
-            <button onClick={handleSubmitVisit} disabled={submitting} className="btn-accent w-full">
+            <button
+              onClick={handleSubmitVisit}
+              disabled={submitting || compressing}
+              className="btn-accent w-full"
+            >
               {submitting ? 'Menyimpan...' : 'Simpan Kunjungan'}
             </button>
           </div>
