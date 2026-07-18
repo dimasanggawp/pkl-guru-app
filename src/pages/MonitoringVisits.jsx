@@ -29,7 +29,8 @@ export default function MonitoringVisits() {
   const [visits, setVisits] = useState([]);
   const [students, setStudents] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [studentSearch, setStudentSearch] = useState('');
   const [notes, setNotes] = useState('');
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,9 +94,23 @@ export default function MonitoringVisits() {
     setPhotos((prev) => prev.filter((_, i) => i !== idx));
   };
 
+  const toggleStudent = (id) => {
+    setSelectedStudents((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
+  };
+
+  const filteredStudents = students.filter((student) => {
+    const q = studentSearch.trim().toLowerCase();
+    if (!q) return true;
+    const name = (student.name || student.nama || '').toLowerCase();
+    const nisn = String(student.nisn || '').toLowerCase();
+    return name.includes(q) || nisn.includes(q);
+  });
+
   const handleSubmitVisit = async () => {
-    if (!selectedStudent) {
-      showError('Pilih siswa terlebih dahulu');
+    if (selectedStudents.length === 0) {
+      showError('Pilih minimal satu siswa');
       return;
     }
     if (!notes.trim()) {
@@ -105,21 +120,31 @@ export default function MonitoringVisits() {
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('siswa_id', selectedStudent);
-      formData.append('notes', notes);
-      photos.forEach((photo) => formData.append('photos', photo));
+      const results = await Promise.allSettled(
+        selectedStudents.map((siswaId) => {
+          const formData = new FormData();
+          formData.append('siswa_id', siswaId);
+          formData.append('notes', notes);
+          photos.forEach((photo) => formData.append('photos', photo));
+          return API.post('/guru/visits', formData);
+        })
+      );
 
-      await API.post('/guru/visits', formData);
+      const failed = results.filter((r) => r.status === 'rejected');
+      if (failed.length === 0) {
+        showSuccess(`Kunjungan berhasil disimpan untuk ${selectedStudents.length} siswa`);
+      } else if (failed.length < results.length) {
+        showError(`${failed.length} dari ${results.length} siswa gagal disimpan`);
+      } else {
+        showError(getErrorMessage(failed[0].reason));
+      }
 
-      showSuccess('Kunjungan berhasil disimpan');
-      setSelectedStudent('');
+      setSelectedStudents([]);
+      setStudentSearch('');
       setNotes('');
       setPhotos([]);
       setShowForm(false);
       setRefreshKey((key) => key + 1);
-    } catch (err) {
-      showError(getErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -151,20 +176,36 @@ export default function MonitoringVisits() {
 
           <div className="space-y-4">
             <div>
-              <label className="field-label">Pilih Siswa</label>
-              <select
-                value={selectedStudent}
-                onChange={(e) => setSelectedStudent(e.target.value)}
-                className="field-input"
-                required
-              >
-                <option value="">-- Pilih siswa --</option>
-                {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.name || student.nama} - {student.nisn}
-                  </option>
+              <label className="field-label">
+                Pilih Siswa {selectedStudents.length > 0 && `(${selectedStudents.length} dipilih)`}
+              </label>
+              <input
+                type="text"
+                value={studentSearch}
+                onChange={(e) => setStudentSearch(e.target.value)}
+                placeholder="Cari nama/NISN..."
+                className="field-input mb-2"
+              />
+              <div className="max-h-56 overflow-y-auto border border-border rounded-md divide-y divide-border">
+                {filteredStudents.length === 0 && (
+                  <p className="text-sm text-muted p-3">Tidak ada siswa ditemukan.</p>
+                )}
+                {filteredStudents.map((student) => (
+                  <label
+                    key={student.id}
+                    className="flex items-center gap-2 p-2 cursor-pointer hover:bg-surface-alt"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedStudents.includes(student.id)}
+                      onChange={() => toggleStudent(student.id)}
+                    />
+                    <span className="text-sm">
+                      {student.name || student.nama} - {student.nisn}
+                    </span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
 
             <div>
@@ -219,7 +260,11 @@ export default function MonitoringVisits() {
               disabled={submitting || compressing}
               className="btn-accent w-full"
             >
-              {submitting ? 'Menyimpan...' : 'Simpan Kunjungan'}
+              {submitting
+                ? 'Menyimpan...'
+                : selectedStudents.length > 1
+                  ? `Simpan Kunjungan (${selectedStudents.length} Siswa)`
+                  : 'Simpan Kunjungan'}
             </button>
           </div>
         </div>
