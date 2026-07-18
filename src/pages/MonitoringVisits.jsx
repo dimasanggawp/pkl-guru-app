@@ -32,7 +32,8 @@ export default function MonitoringVisits() {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [studentSearch, setStudentSearch] = useState('');
   const [notes, setNotes] = useState('');
-  const [photos, setPhotos] = useState([]);
+  const [photosMonitoring, setPhotosMonitoring] = useState([]);
+  const [photosForm, setPhotosForm] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -65,7 +66,7 @@ export default function MonitoringVisits() {
     fetchData();
   }, [refreshKey]);
 
-  const handlePhotoCapture = async (e) => {
+  const handlePhotoCapture = async (e, setPhotos) => {
     const files = Array.from(e.target.files);
     e.target.value = '';
 
@@ -90,7 +91,7 @@ export default function MonitoringVisits() {
     }
   };
 
-  const handleRemovePhoto = (idx) => {
+  const handleRemovePhoto = (setPhotos, idx) => {
     setPhotos((prev) => prev.filter((_, i) => i !== idx));
   };
 
@@ -125,7 +126,8 @@ export default function MonitoringVisits() {
           const formData = new FormData();
           formData.append('siswa_id', siswaId);
           formData.append('notes', notes);
-          photos.forEach((photo) => formData.append('photos', photo));
+          photosMonitoring.forEach((photo) => formData.append('photos_monitoring', photo));
+          photosForm.forEach((photo) => formData.append('photos_form', photo));
           return API.post('/guru/visits', formData);
         })
       );
@@ -142,7 +144,8 @@ export default function MonitoringVisits() {
       setSelectedStudents([]);
       setStudentSearch('');
       setNotes('');
-      setPhotos([]);
+      setPhotosMonitoring([]);
+      setPhotosForm([]);
       setShowForm(false);
       setRefreshKey((key) => key + 1);
     } finally {
@@ -220,30 +223,29 @@ export default function MonitoringVisits() {
             </div>
 
             <div>
-              <label className="field-label">Lampirkan Foto</label>
+              <label className="field-label">Foto Monitoring dengan Siswa</label>
               <input
                 type="file"
                 multiple
                 accept="image/*"
-                onChange={handlePhotoCapture}
+                onChange={(e) => handlePhotoCapture(e, setPhotosMonitoring)}
                 disabled={compressing}
                 className="field-input"
               />
-              {compressing && <p className="text-sm text-muted mt-2">Mengompres foto...</p>}
-              {photos.length > 0 && (
+              {photosMonitoring.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-sm text-muted mb-2">{photos.length} foto dipilih</p>
+                  <p className="text-sm text-muted mb-2">{photosMonitoring.length} foto dipilih</p>
                   <div className="grid grid-cols-4 gap-2">
-                    {photos.map((photo, idx) => (
+                    {photosMonitoring.map((photo, idx) => (
                       <div key={idx} className="relative">
                         <img
                           src={URL.createObjectURL(photo)}
-                          alt={`Preview ${idx}`}
+                          alt={`Preview monitoring ${idx}`}
                           className="w-full h-20 object-cover rounded-md border border-border"
                         />
                         <button
                           type="button"
-                          onClick={() => handleRemovePhoto(idx)}
+                          onClick={() => handleRemovePhoto(setPhotosMonitoring, idx)}
                           className="absolute top-1 right-1 bg-danger text-white rounded-full w-5 h-5 flex items-center justify-center"
                         >
                           <X size={12} />
@@ -254,6 +256,43 @@ export default function MonitoringVisits() {
                 </div>
               )}
             </div>
+
+            <div>
+              <label className="field-label">Foto Form/Lembar Monitoring</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => handlePhotoCapture(e, setPhotosForm)}
+                disabled={compressing}
+                className="field-input"
+              />
+              {photosForm.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-muted mb-2">{photosForm.length} foto dipilih</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {photosForm.map((photo, idx) => (
+                      <div key={idx} className="relative">
+                        <img
+                          src={URL.createObjectURL(photo)}
+                          alt={`Preview form ${idx}`}
+                          className="w-full h-20 object-cover rounded-md border border-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(setPhotosForm, idx)}
+                          className="absolute top-1 right-1 bg-danger text-white rounded-full w-5 h-5 flex items-center justify-center"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {compressing && <p className="text-sm text-muted">Mengompres foto...</p>}
 
             <button
               onClick={handleSubmitVisit}
@@ -285,19 +324,32 @@ export default function MonitoringVisits() {
               </div>
               <p className="text-ink mb-3">{visit.notes}</p>
               {Array.isArray(visit.photos) && visit.photos.length > 0 && (
-                <div className="grid grid-cols-4 gap-2">
-                  {visit.photos.map((photo, idx) => (
-                    <img
-                      key={idx}
-                      src={photo.startsWith('http') ? photo : `${FILE_BASE_URL}${photo}`}
-                      alt={`Foto kunjungan ${idx + 1}`}
-                      className="w-full h-24 object-cover rounded-md border border-border"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ))}
-                </div>
+                <>
+                  {['monitoring', 'form'].map((tipe) => {
+                    const groupPhotos = visit.photos.filter((photo) => photo.tipe_foto === tipe);
+                    if (groupPhotos.length === 0) return null;
+                    return (
+                      <div key={tipe} className="mb-3 last:mb-0">
+                        <p className="text-xs text-muted mb-1">
+                          {tipe === 'monitoring' ? 'Foto Monitoring dengan Siswa' : 'Foto Form/Lembar Monitoring'}
+                        </p>
+                        <div className="grid grid-cols-4 gap-2">
+                          {groupPhotos.map((photo, idx) => (
+                            <img
+                              key={idx}
+                              src={photo.path.startsWith('http') ? photo.path : `${FILE_BASE_URL}${photo.path}`}
+                              alt={`Foto kunjungan ${idx + 1}`}
+                              className="w-full h-24 object-cover rounded-md border border-border"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
               )}
             </div>
           ))}
